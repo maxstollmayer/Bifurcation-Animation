@@ -1,35 +1,32 @@
 from matplotlib import pyplot as plt
-from typing import Callable
+from matplotlib.animation import FuncAnimation
+from typing import Callable, Iterable
+from matplotlib.artist import Artist
 import numpy as np
 from numpy.typing import NDArray
 
 
-def calc_diagram(
-    f: Callable[[float, float], float],
+def bifurcate(
+    f: Callable[[NDArray, NDArray], NDArray],
     xs: NDArray[np.float64] = np.linspace(0, 1, 100),
-    params: NDArray[np.float64] = np.linspace(0, 4, 1000),
+    params: NDArray[np.float64] = np.linspace(0, 4, 100),
     max_iter: int = 100,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    n = len(xs)
-    m = len(params)
-    params = np.repeat(params, n)
-    xs = np.tile(xs, m)
-    result = np.zeros_like(xs)
+) -> FuncAnimation:
+    X, A = np.meshgrid(xs, params)
 
-    for i in range(m * n):
-        x = xs[i]
-        a = params[i]
-        for _ in range(max_iter):
-            x = f(x, a)
-            if x < 0 or x > 1:
-                break
-        result[i] = x
+    fig, ax = plt.subplots()
+    fig.set_size_inches(16, 9)
+    ax.set_xlim(params[0], params[-1])
+    ax.set_ylim(xs[0], xs[-1])
+    ax.set_xlabel("parameter")
+    ax.set_ylabel("position")
+    plot = ax.scatter([], [], s=1, color="black", alpha=0.01, marker=".")
 
-    return params, result
+    def update(frame: int) -> Iterable[Artist]:
+        nonlocal X
+        if frame > 0:
+            X = f(X, A)
+        plot.set_offsets(np.c_[A.ravel(), X.ravel()])
+        return []
 
-
-def plot_diagram(params, vals, s: int = 1, alpha: float = 0.5):
-    plt.scatter(params, vals, s=s, alpha=alpha)
-    plt.xlim(0, 4)
-    plt.ylim(0, 1)
-    plt.show()
+    return FuncAnimation(fig, update, frames=max_iter, interval=1, blit=False)
