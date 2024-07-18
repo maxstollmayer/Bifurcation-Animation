@@ -1,4 +1,4 @@
-from lib import bifurcate
+from lib import bifurcate, bifurcate_ode
 import numpy as np
 from numpy.typing import NDArray
 
@@ -24,10 +24,15 @@ def f5(x: NDArray, a: NDArray) -> NDArray:
 
 
 def main():
-    animation = bifurcate(
-        f5, np.linspace(0, 1, 1000), np.linspace(0, 4, 4000), max_iter=24 * 10
+    animation = bifurcate_ode(
+        f1,
+        np.linspace(0.1, 1.1, 1000),
+        np.linspace(0, 4, 4000),
+        max_iter=24 * 10,
+        step_size=0.1,
+        alpha=0.01,
     )
-    animation.save("cubic_negative.mp4", dpi=100, fps=24, writer="ffmpeg", bitrate=2400)
+    animation.save("logistic_ode.mp4", dpi=100, fps=24, writer="ffmpeg", bitrate=2400)
 
 
 if __name__ == "__main__":

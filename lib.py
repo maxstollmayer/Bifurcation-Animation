@@ -8,9 +8,10 @@ from numpy.typing import NDArray
 
 def bifurcate(
     f: Callable[[NDArray, NDArray], NDArray],
-    xs: NDArray[np.float64] = np.linspace(0, 1, 100),
-    params: NDArray[np.float64] = np.linspace(0, 4, 100),
+    xs: NDArray[np.float64],
+    params: NDArray[np.float64],
     max_iter: int = 100,
+    alpha: float = 0.01,
 ) -> FuncAnimation:
     X, A = np.meshgrid(xs, params)
 
@@ -20,7 +21,7 @@ def bifurcate(
     ax.set_ylim(xs[0], xs[-1])
     ax.set_xlabel("parameter")
     ax.set_ylabel("position")
-    plot = ax.scatter([], [], s=1, color="black", alpha=0.01, marker=".")
+    plot = ax.scatter([], [], s=1, color="black", alpha=alpha, marker=".")
 
     def update(frame: int) -> Iterable[Artist]:
         nonlocal X
@@ -30,3 +31,23 @@ def bifurcate(
         return []
 
     return FuncAnimation(fig, update, frames=max_iter, interval=1, blit=False)
+
+
+def bifurcate_ode(
+    f: Callable[[NDArray, NDArray], NDArray],
+    xs: NDArray[np.float64],
+    params: NDArray[np.float64],
+    max_iter: int = 100,
+    step_size: float = 0.01,
+    alpha: float = 0.01,
+) -> FuncAnimation:
+    h = step_size
+
+    def func(x: NDArray, a: NDArray) -> NDArray:
+        k1 = f(x, a)
+        k2 = f(x + h * k1 / 2, a)
+        k3 = f(x + h * k2 / 2, a)
+        k4 = f(x + h * k3, a)
+        return x + h * (k1 + 2 * k2 + 2 * k3 + k4) / 6
+
+    return bifurcate(func, xs, params, max_iter, alpha)
