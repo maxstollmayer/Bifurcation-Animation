@@ -5,3 +5,5 @@ Simple interface to generate an animation of a bifurcation of an iterated map or
 ## Quick Start
 
 Copy the `lib.py` to your local folder and import the `Video` class from it to your script. The function to use for the bifurcation has to be callable with 2-dimensional numpy arrays.
+
+![bifurcation](bifurcation.gif)
